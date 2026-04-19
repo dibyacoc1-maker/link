@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NexLink API — Demo</title>
+<title>NexLink API</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#0a0b0f;color:#f1f5f9;min-height:100vh;padding:1.5rem 1rem;-webkit-font-smoothing:antialiased}
@@ -53,7 +53,7 @@ input:focus,select:focus{outline:none;border-color:#3b82f6}
 <body>
 <div class="wrap">
   <h1>🔗 NexLink API</h1>
-  <p class="sub">Interactive API demo · Your key is pre-configured</p>
+  <p class="sub">Interactive API  · Your key is pre-configured</p>
 
   <!-- CORS warning shown when opened from file:// -->
   <div class="warn" id="cors-warn">
@@ -184,7 +184,7 @@ async function doShorten() {
     var dy = document.getElementById('s-days').value;
     if (al) body.alias = al;
     if (dy) body.expiry_days = parseInt(dy);
-    var j = await apiFetch('POST', '/shorten', body);
+    var j = await apiFetch('POST', '/shorten.php', body);
     if (j.success) {
       document.getElementById('s-res').className = 'res';
       document.getElementById('s-box').className = 'short-box show';
@@ -203,7 +203,7 @@ async function doStats() {
   if (!code) { alert('Enter a short code'); return; }
   show('st-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/stats/' + code);
+    var j = await apiFetch('GET', '/stats.php' + code);
     show('st-res', JSON.stringify(j.data || j.error, null, 2), j.success ? 'ok' : 'err');
   } catch(e) { show('st-res', 'Error: ' + e.message, 'err'); }
 }
@@ -214,7 +214,7 @@ async function doDelete() {
   if (!confirm('Delete /' + code + ' permanently?')) return;
   show('d-res', 'Deleting…', '');
   try {
-    var j = await apiFetch('DELETE', '/delete/' + code);
+    var j = await apiFetch('DELETE', '/delete.php' + code);
     show('d-res', j.success ? '✅ Deleted successfully' : '❌ ' + ((j.error && j.error.message) || 'Failed'), j.success ? 'ok' : 'err');
   } catch(e) { show('d-res', 'Error: ' + e.message, 'err'); }
 }
@@ -222,7 +222,7 @@ async function doDelete() {
 async function doMe() {
   show('me-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/me');
+    var j = await apiFetch('GET', '/me.php');
     show('me-res', JSON.stringify(j.data, null, 2), j.success ? 'ok' : 'err');
   } catch(e) { show('me-res', 'Error: ' + e.message, 'err'); }
 }
@@ -230,7 +230,7 @@ async function doMe() {
 async function doMyLinks() {
   show('ml-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/me/links');
+    var j = await apiFetch('GET', '/me/links.php');
     if (j.success) {
       var links = (j.data.links || []).slice(0, 5).map(function(l) {
         return '/' + l.short_code + '  →  ' + l.original_url.slice(0, 55) + (l.original_url.length > 55 ? '…' : '') + '\n   Clicks: ' + (l.stats && l.stats.total_clicks || 0);
@@ -243,7 +243,7 @@ async function doMyLinks() {
 async function doLeaderboard() {
   show('lb-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/leaderboard');
+    var j = await apiFetch('GET', '/leaderboard.php');
     if (j.success) {
       var rows = (j.data.leaderboard || []).map(function(u, i) {
         return (i+1) + '. ' + u.username + ' — 🪙 ' + u.coins + ' coins  (' + u.role + ')';
