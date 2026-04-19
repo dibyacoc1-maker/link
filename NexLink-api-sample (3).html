@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexLink API — Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#0a0b0f;color:#f1f5f9;min-height:100vh;padding:1.5rem 1rem;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.75rem;font-weight:800;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.25rem}
+.sub{color:#64748b;font-size:.875rem;margin-bottom:1rem}
+.notice{border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.83rem;display:none}
+.notice.show{display:block}
+.notice.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fbbf24}
+.notice.info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
+.notice.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399}
+.key-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:.75rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
+.key-box label{font-size:.7rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.key-val{font-family:'Courier New',monospace;font-size:.78rem;flex:1;min-width:0;word-break:break-all;color:#f59e0b}
+.copy-btn{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.35);color:#f59e0b;border-radius:6px;padding:.35rem .8rem;cursor:pointer;font-size:.74rem;font-weight:700;white-space:nowrap}
+.copy-btn:hover{background:rgba(245,158,11,.32)}
+.tabs{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.tab{background:#1a1d27;border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:.38rem .85rem;font-size:.8rem;font-weight:600;cursor:pointer;color:#64748b;font-family:inherit;transition:all .15s;border:none}
+.tab.on{background:#3b82f6;color:#fff}
+.tab:hover:not(.on){background:rgba(255,255,255,.08);color:#94a3b8}
+.panel{display:none}.panel.on{display:block}
+.card{background:#111318;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem;margin-bottom:.9rem}
+.card-title{font-size:.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.9rem}
+label{display:block;font-size:.72rem;font-weight:600;color:#64748b;margin-bottom:.3rem;margin-top:.65rem}
+label:first-of-type{margin-top:0}
+input,select{width:100%;background:#1a1d27;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.62rem .88rem;color:#f1f5f9;font-size:.875rem;font-family:inherit;transition:border-color .15s}
+input:focus,select:focus{outline:none;border-color:#3b82f6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;gap:.35rem;padding:.72rem;border-radius:8px;font-weight:700;font-size:.875rem;border:none;cursor:pointer;transition:all .18s;margin-top:.9rem;font-family:inherit}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+.btn-blue:hover{opacity:.87;transform:translateY(-1px)}
+.btn-red{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff}
+.btn-red:hover{opacity:.87}
+.res{background:#0c0e13;border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:.88rem;font-family:'Courier New',monospace;font-size:.77rem;color:#64748b;min-height:50px;white-space:pre-wrap;word-break:break-word;display:none;margin-top:.75rem;max-height:280px;overflow-y:auto;line-height:1.6}
+.res.show{display:block}
+.res.ok{border-color:rgba(16,185,129,.3);color:#34d399}
+.res.err{border-color:rgba(239,68,68,.3);color:#f87171}
+.short-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:.88rem 1rem;margin-top:.75rem;display:none}
+.short-box.show{display:block}
+.short-url{font-family:'Courier New',monospace;font-size:.92rem;color:#60a5fa;word-break:break-all;font-weight:700}
+.cbtn{background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.28);color:#60a5fa;border-radius:5px;padding:.25rem .7rem;cursor:pointer;font-size:.74rem;font-weight:700;margin-left:.5rem}
+.cbtn:hover{background:rgba(59,130,246,.28)}
+.qr-wrap{margin-top:.75rem;text-align:center;background:#fff;border-radius:8px;padding:8px;display:none;width:160px}
+.qr-wrap.show{display:inline-block}
+.method{font-size:.68rem;font-weight:700;padding:.2rem .5rem;border-radius:4px;margin-right:.4rem}
+.M-POST{background:rgba(59,130,246,.15);color:#60a5fa}
+.M-GET{background:rgba(16,185,129,.15);color:#34d399}
+.M-DEL{background:rgba(239,68,68,.15);color:#f87171}
+.ep-info{font-size:.77rem;color:#475569;margin-bottom:.75rem;background:#0d0f14;border-radius:7px;padding:.6rem .8rem;font-family:'Courier New',monospace}
+footer{text-align:center;margin-top:1.75rem;padding-top:1.1rem;border-top:1px solid rgba(255,255,255,.07);font-size:.76rem;color:#334155}
+footer a{color:#3b82f6;text-decoration:none}
+@media(max-width:500px){.row{grid-template-columns:1fr}.key-box{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔗 NexLink API</h1>
+  <p class="sub">Interactive API demo · Your key is pre-configured · Works from any domain</p>
+
+  <!-- Status notices -->
+  <div id="notice-file" class="notice warn">
+    ⚠️ <strong>Opened from local disk (file://)</strong> — Browsers block cross-origin requests from <code>file://</code> pages.
+    <strong>Open this from your server instead:</strong>
+    <a href="https://nexlink.free.nf/api-sample" style="color:#fbbf24">
+      https://nexlink.free.nf/api-sample
+    </a>
+    &nbsp;— or host this file on any web server.
+  </div>
+  <div id="notice-ok" class="notice ok" style="display:none">
+    ✅ API connection ready — requests use <code>application/x-www-form-urlencoded</code> (no CORS preflight needed)
+  </div>
+
+  <!-- Key display -->
+  <div class="key-box">
+    <label>🔑 API Key</label>
+    <span class="key-val">nxl_live_4310d718420c3ef••••••••••••••••</span>
+    <button class="copy-btn" onclick="copyKey()">Copy Full Key</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab on"  onclick="tab('shorten',this)">🔗 Shorten</button>
+    <button class="tab"     onclick="tab('stats',this)">📊 Stats</button>
+    <button class="tab"     onclick="tab('delete',this)">🗑️ Delete</button>
+    <button class="tab"     onclick="tab('profile',this)">👤 Profile</button>
+    <button class="tab"     onclick="tab('lb',this)">🏆 Leaderboard</button>
+  </div>
+
+  <!-- SHORTEN -->
+  <div id="p-shorten" class="panel on">
+    <div class="card">
+      <div class="card-title">🔗 Shorten a URL</div>
+      <div class="ep-info"><span class="method M-POST">POST</span>https://nexlink.free.nf/api/v1/shorten</div>
+      <label>Destination URL *</label>
+      <input type="url" id="s-url" placeholder="https://example.com/very-long-url">
+      <div class="row">
+        <div><label>Custom Alias (VIP)</label><input type="text" id="s-alias" placeholder="my-brand"></div>
+        <div><label>Expiry (days)</label><input type="number" id="s-days" placeholder="30" min="1"></div>
+      </div>
+      <button class="btn btn-blue" id="s-btn" onclick="doShorten()">🔗 Create Short Link</button>
+      <div id="s-res" class="res"></div>
+      <div id="s-box" class="short-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem">
+          <span class="short-url" id="s-out"></span>
+          <button class="cbtn" onclick="copyShort()">Copy</button>
+        </div>
+        <div id="s-qr-wrap" class="qr-wrap">
+          <canvas id="s-qr-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div id="p-stats" class="panel">
+    <div class="card">
+      <div class="card-title">📊 Get Link Stats</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/stats/{code}</div>
+      <label>Short Code</label>
+      <input type="text" id="st-code" placeholder="e.g. abc123">
+      <button class="btn btn-blue" onclick="doStats()">📊 Get Stats</button>
+      <div id="st-res" class="res"></div>
+    </div>
+  </div>
+
+  <!-- DELETE -->
+  <div id="p-delete" class="panel">
+    <div class="card">
+      <div class="card-title">🗑️ Delete a Link</div>
+      <div class="ep-info"><span class="method M-DEL">DELETE</span>https://nexlink.free.nf/api/v1/delete/{code}</div>
+      <label>Short Code to Delete</label>
+      <input type="text" id="d-code" placeholder="e.g. abc123">
+      <button class="btn btn-red" onclick="doDelete()">🗑️ Delete Permanently</button>
+      <div id="d-res" class="res"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="p-profile" class="panel">
+    <div class="card">
+      <div class="card-title">👤 My Profile</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/me</div>
+      <button class="btn btn-blue" onclick="doMe()">👤 Load Profile</button>
+      <div id="me-res" class="res"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔗 My Links</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/me/links</div>
+      <button class="btn btn-blue" onclick="doMyLinks()">🔗 Load Links</button>
+      <div id="ml-res" class="res"></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="p-lb" class="panel">
+    <div class="card">
+      <div class="card-title">🏆 Leaderboard (public — no auth needed)</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/leaderboard</div>
+      <button class="btn btn-blue" onclick="doLB()">🏆 Load Leaderboard</button>
+      <div id="lb-res" class="res"></div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://nexlink.free.nf">← NexLink</a> ·
+    <a href="https://nexlink.free.nf/api-docs">Full API Docs</a> ·
+    <a href="https://nexlink.free.nf/profile">Manage API Keys</a>
+  </footer>
+</div>
+
+<!-- qrcode.js for client-side QR generation (no server dependency) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+var KEY  = "nxl_live_4310d718420c3ef3d81b2035571e3961f9cb25b2";
+var BASE = "https:\/\/nexlink.free.nf\/api\/v1";
+
+// ── Detect file:// and show warning ──────────────────────
+if (location.protocol === 'file:') {
+  document.getElementById('notice-file').classList.add('show');
+} else {
+  document.getElementById('notice-ok').classList.add('show');
+  document.getElementById('notice-ok').style.display = 'block';
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function show(id, text, cls) {
+  var el = document.getElementById(id);
+  el.className = 'res show' + (cls ? ' ' + cls : '');
+  el.textContent = text;
+}
+
+// CORS-SAFE fetch: sends api_key in body/params — NO preflight for GET
+// For POST: uses URLSearchParams (content-type: application/x-www-form-urlencoded)
+// This works from ANY origin, even file:// (if server allows *)
+async function apiFetch(method, path, params) {
+  var url  = BASE + path;
+  var opts = { method: method };
+
+  if (method === 'GET' || method === 'DELETE') {
+    // Append api_key to URL (no preflight for GET)
+    var sep = url.includes('?') ? '&' : '?';
+    url += sep + 'api_key=' + encodeURIComponent(KEY);
+  } else {
+    // POST: use URLSearchParams = Content-Type: application/x-www-form-urlencoded
+    // This is a "simple" request — NO CORS preflight needed!
+    var body = new URLSearchParams();
+    body.append('api_key', KEY);
+    if (params) {
+      Object.keys(params).forEach(function(k) {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          body.append(k, params[k]);
+        }
+      });
+    }
+    opts.body = body;
+    // NOTE: Do NOT set Content-Type header — browser sets it automatically
+    // Setting it manually would trigger a preflight!
+  }
+
+  var r = await fetch(url, opts);
+  return r.json();
+}
+
+// ── QR generation (client-side via qrcode.js) ────────────
+function showQR(text) {
+  var canvas = document.getElementById('s-qr-canvas');
+  var wrap   = document.getElementById('s-qr-wrap');
+  if (!canvas || !wrap) return;
+  canvas.innerHTML = '';
+  wrap.classList.add('show');
+  try {
+    new QRCode(canvas, {
+      text:         text,
+      width:        144,
+      height:       144,
+      colorDark:    '#000000',
+      colorLight:   '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    // qrcode.js not loaded (offline) — fallback to server
+    var img = document.createElement('img');
+    img.src = BASE.replace('/api/v1','') + '/api/v1/qr/' + text.split('/').pop() + '?size=144';
+    img.style.width = '144px';
+    img.style.height = '144px';
+    canvas.appendChild(img);
+  }
+}
+
+// ── API actions ──────────────────────────────────────────
+async function doShorten() {
+  var url = (document.getElementById('s-url').value||'').trim();
+  if (!url) { alert('Enter a URL'); return; }
+  if (!url.startsWith('http')) { alert('URL must start with https:// or http://'); return; }
+
+  var btn = document.getElementById('s-btn');
+  btn.disabled = true; btn.textContent = '⏳ Creating…';
+  document.getElementById('s-box').className = 'short-box';
+  show('s-res', 'Creating short link…', '');
+
+  var params = { url: url };
+  var alias  = (document.getElementById('s-alias').value||'').trim();
+  var days   = (document.getElementById('s-days').value||'').trim();
+  if (alias) params.alias = alias;
+  if (days)  params.expiry_days = days;
+
+  try {
+    var j = await apiFetch('POST', '/shorten', params);
+    if (j.success) {
+      document.getElementById('s-res').className = 'res';
+      document.getElementById('s-box').className = 'short-box show';
+      document.getElementById('s-out').textContent = j.data.short_url;
+      showQR(j.data.short_url);
+    } else {
+      show('s-res', '❌ ' + ((j.error && j.error.message) || 'Failed'), 'err');
+    }
+  } catch(e) {
+    var msg = '❌ ' + e.message;
+    if (location.protocol === 'file:') msg += '\n\nYou are opening this file from your local disk.\nPlease open it from the server: https://nexlink.free.nf/api-sample';
+    show('s-res', msg, 'err');
+  }
+
+  btn.disabled = false; btn.innerHTML = '🔗 Create Short Link';
+}
+
+async function doStats() {
+  var code = (document.getElementById('st-code').value||'').trim();
+  if (!code) { alert('Enter a short code'); return; }
+  show('st-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/stats/' + encodeURIComponent(code));
+    show('st-res', JSON.stringify(j.success ? j.data : j.error, null, 2), j.success?'ok':'err');
+  } catch(e) { show('st-res', '❌ ' + e.message, 'err'); }
+}
+
+async function doDelete() {
+  var code = (document.getElementById('d-code').value||'').trim();
+  if (!code) { alert('Enter a short code'); return; }
+  if (!confirm('Delete /' + code + ' permanently?')) return;
+  show('d-res', 'Deleting…', '');
+  try {
+    var j = await apiFetch('DELETE', '/delete/' + encodeURIComponent(code));
+    show('d-res', j.success ? '✅ Link deleted successfully' : '❌ ' + ((j.error&&j.error.message)||'Failed'), j.success?'ok':'err');
+  } catch(e) { show('d-res', '❌ ' + e.message, 'err'); }
+}
+
+async function doMe() {
+  show('me-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/me');
+    show('me-res', JSON.stringify(j.success ? j.data : j.error, null, 2), j.success?'ok':'err');
+  } catch(e) { show('me-res', '❌ ' + e.message, 'err'); }
+}
+
+async function doMyLinks() {
+  show('ml-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/me/links');
+    if (j.success) {
+      var txt = (j.data.links||[]).slice(0,5).map(function(l,i) {
+        return (i+1)+'. /'+l.short_code+'  →  '+(l.original_url||'').slice(0,60) + '\n   Clicks: '+((l.stats&&l.stats.total_clicks)||0);
+      }).join('\n\n') || 'No links yet.';
+      show('ml-res', txt, 'ok');
+    } else { show('ml-res', '❌ '+((j.error&&j.error.message)||'Error'), 'err'); }
+  } catch(e) { show('ml-res', '❌ ' + e.message, 'err'); }
+}
+
+async function doLB() {
+  show('lb-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/leaderboard');
+    if (j.success) {
+      var txt = (j.data.leaderboard||[]).map(function(u,i){
+        return (i+1)+'. '+u.username+' — 🪙 '+u.coins+' coins ('+u.role+')';
+      }).join('\n');
+      show('lb-res', txt||'No users.', 'ok');
+    } else { show('lb-res', '❌ Error', 'err'); }
+  } catch(e) { show('lb-res', '❌ ' + e.message, 'err'); }
+}
+
+function tab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('p-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+function copyKey() {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(KEY).then(function(){ alert('API key copied!'); });
+  } else {
+    var t = document.createElement('textarea');
+    t.value = KEY; t.style.position='fixed'; t.style.opacity='0';
+    document.body.appendChild(t); t.select(); document.execCommand('copy');
+    document.body.removeChild(t); alert('API key copied!');
+  }
+}
+
+function copyShort() {
+  var url = document.getElementById('s-out').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){ event.target.textContent='✓'; setTimeout(function(){event.target.textContent='Copy';},2000); });
+  }
+}
+</script>
+</body>
+</html>
