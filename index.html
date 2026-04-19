@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NexLink API — Demo</title>
+<title>NexLink API</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#0a0b0f;color:#f1f5f9;min-height:100vh;padding:1.5rem 1rem;-webkit-font-smoothing:antialiased}
@@ -63,7 +63,7 @@ footer a{color:#3b82f6;text-decoration:none}
 <div class="wrap">
 
   <h1>🔗 NexLink API</h1>
-  <p class="sub">Interactive API demo · Your key is pre-configured · Works from any domain</p>
+  <p class="sub">Interactive API  · Your key is pre-configured · Works from any domain</p>
 
   <!-- Status notices -->
   <div id="notice-file" class="notice warn">
@@ -98,7 +98,7 @@ footer a{color:#3b82f6;text-decoration:none}
   <div id="p-shorten" class="panel on">
     <div class="card">
       <div class="card-title">🔗 Shorten a URL</div>
-      <div class="ep-info"><span class="method M-POST">POST</span>https://nexlink.free.nf/api/v1/shorten</div>
+      <div class="ep-info"><span class="method M-POST">POST</span>https://nexlink.free.nf/api/v1/shorten.php</div>
       <label>Destination URL *</label>
       <input type="url" id="s-url" placeholder="https://example.com/very-long-url">
       <div class="row">
@@ -147,13 +147,13 @@ footer a{color:#3b82f6;text-decoration:none}
   <div id="p-profile" class="panel">
     <div class="card">
       <div class="card-title">👤 My Profile</div>
-      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/me</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/me.php</div>
       <button class="btn btn-blue" onclick="doMe()">👤 Load Profile</button>
       <div id="me-res" class="res"></div>
     </div>
     <div class="card">
       <div class="card-title">🔗 My Links</div>
-      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/me/links</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/me/links.php</div>
       <button class="btn btn-blue" onclick="doMyLinks()">🔗 Load Links</button>
       <div id="ml-res" class="res"></div>
     </div>
@@ -163,7 +163,7 @@ footer a{color:#3b82f6;text-decoration:none}
   <div id="p-lb" class="panel">
     <div class="card">
       <div class="card-title">🏆 Leaderboard (public — no auth needed)</div>
-      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/leaderboard</div>
+      <div class="ep-info"><span class="method M-GET">GET</span>https://nexlink.free.nf/api/v1/leaderboard.php</div>
       <button class="btn btn-blue" onclick="doLB()">🏆 Load Leaderboard</button>
       <div id="lb-res" class="res"></div>
     </div>
@@ -274,7 +274,7 @@ async function doShorten() {
   if (days)  params.expiry_days = days;
 
   try {
-    var j = await apiFetch('POST', '/shorten', params);
+    var j = await apiFetch('POST', '/shorten.php', params);
     if (j.success) {
       document.getElementById('s-res').className = 'res';
       document.getElementById('s-box').className = 'short-box show';
@@ -308,7 +308,7 @@ async function doDelete() {
   if (!confirm('Delete /' + code + ' permanently?')) return;
   show('d-res', 'Deleting…', '');
   try {
-    var j = await apiFetch('DELETE', '/delete/' + encodeURIComponent(code));
+    var j = await apiFetch('DELETE', '/delete.php' + encodeURIComponent(code));
     show('d-res', j.success ? '✅ Link deleted successfully' : '❌ ' + ((j.error&&j.error.message)||'Failed'), j.success?'ok':'err');
   } catch(e) { show('d-res', '❌ ' + e.message, 'err'); }
 }
@@ -316,7 +316,7 @@ async function doDelete() {
 async function doMe() {
   show('me-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/me');
+    var j = await apiFetch('GET', '/me.php');
     show('me-res', JSON.stringify(j.success ? j.data : j.error, null, 2), j.success?'ok':'err');
   } catch(e) { show('me-res', '❌ ' + e.message, 'err'); }
 }
@@ -324,7 +324,7 @@ async function doMe() {
 async function doMyLinks() {
   show('ml-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/me/links');
+    var j = await apiFetch('GET', '/me/links.php');
     if (j.success) {
       var txt = (j.data.links||[]).slice(0,5).map(function(l,i) {
         return (i+1)+'. /'+l.short_code+'  →  '+(l.original_url||'').slice(0,60) + '\n   Clicks: '+((l.stats&&l.stats.total_clicks)||0);
@@ -337,7 +337,7 @@ async function doMyLinks() {
 async function doLB() {
   show('lb-res', 'Loading…', '');
   try {
-    var j = await apiFetch('GET', '/leaderboard');
+    var j = await apiFetch('GET', '/leaderboard.php');
     if (j.success) {
       var txt = (j.data.leaderboard||[]).map(function(u,i){
         return (i+1)+'. '+u.username+' — 🪙 '+u.coins+' coins ('+u.role+')';
