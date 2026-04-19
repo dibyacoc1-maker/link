@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexLink API — Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#0a0b0f;color:#f1f5f9;min-height:100vh;padding:1.5rem 1rem;-webkit-font-smoothing:antialiased}
+.wrap{max-width:700px;margin:0 auto}
+h1{font-size:1.75rem;font-weight:800;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
+.sub{color:#64748b;font-size:.875rem;margin-bottom:1rem}
+.warn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.82rem;color:#f87171;display:none}
+.warn.show{display:block}
+.key-box{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.22);border-radius:10px;padding:.7rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
+.key-box label{font-size:.7rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.key-val{font-family:'Courier New',monospace;font-size:.78rem;flex:1;background:#1a1d27;border:none;border-radius:6px;padding:.38rem .65rem;color:#f59e0b;min-width:0;word-break:break-all}
+.copy-key{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.35);color:#f59e0b;border-radius:6px;padding:.35rem .8rem;cursor:pointer;font-size:.74rem;font-weight:700;white-space:nowrap;transition:background .15s}
+.copy-key:hover{background:rgba(245,158,11,.32)}
+.tabs{display:flex;gap:.35rem;margin-bottom:1.1rem;flex-wrap:wrap}
+.tab{background:#1a1d27;border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:.38rem .82rem;font-size:.8rem;font-weight:600;cursor:pointer;color:#64748b;font-family:inherit;transition:all .15s}
+.tab.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.panel{display:none}.panel.on{display:block}
+.card{background:#111318;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem;margin-bottom:.9rem}
+.card-title{font-size:.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.85rem}
+label{display:block;font-size:.7rem;font-weight:700;color:#64748b;margin-bottom:.3rem;margin-top:.65rem}
+label:first-of-type{margin-top:0}
+input,select{width:100%;background:#1a1d27;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.6rem .85rem;color:#f1f5f9;font-size:.875rem;font-family:inherit;margin-bottom:.1rem;transition:border-color .15s}
+input:focus,select:focus{outline:none;border-color:#3b82f6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;gap:.35rem;padding:.7rem;border-radius:8px;font-weight:700;font-size:.875rem;border:none;cursor:pointer;transition:all .18s;margin-top:.85rem;font-family:inherit}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+.btn-blue:hover{opacity:.88;transform:translateY(-1px)}
+.btn-red{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff}
+.btn-red:hover{opacity:.88}
+.res{background:#0c0e13;border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:.85rem;font-family:'Courier New',monospace;font-size:.76rem;color:#64748b;min-height:54px;white-space:pre-wrap;word-break:break-word;display:none;margin-top:.75rem;max-height:260px;overflow-y:auto;line-height:1.6}
+.res.show{display:block}
+.res.ok{border-color:rgba(16,185,129,.3);color:#34d399}
+.res.err{border-color:rgba(239,68,68,.3);color:#f87171}
+.short-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:.85rem 1rem;margin-top:.75rem;display:none}
+.short-box.show{display:block}
+.short-url{font-family:'Courier New',monospace;font-size:.92rem;color:#60a5fa;word-break:break-all;font-weight:700}
+.cbtn{background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.28);color:#60a5fa;border-radius:5px;padding:.25rem .7rem;cursor:pointer;font-size:.74rem;font-weight:700;margin-left:.5rem;transition:background .15s}
+.cbtn:hover{background:rgba(59,130,246,.28)}
+.qr{width:140px;height:140px;border-radius:8px;background:#fff;padding:5px;margin-top:.7rem;display:none;border:1px solid rgba(255,255,255,.1)}
+.qr.show{display:block}
+.footer{text-align:center;margin-top:1.75rem;padding-top:1.1rem;border-top:1px solid rgba(255,255,255,.07);font-size:.76rem;color:#334155}
+.footer a{color:#3b82f6;text-decoration:none}
+@media(max-width:500px){.row{grid-template-columns:1fr}.key-box{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔗 NexLink API</h1>
+  <p class="sub">Interactive API demo · Your key is pre-configured</p>
+
+  <!-- CORS warning shown when opened from file:// -->
+  <div class="warn" id="cors-warn">
+    ⚠️ <strong>CORS Blocked:</strong> This file is opened from your local disk (<code>file://</code>), which browsers block for security.
+    To use this demo: <strong>open it from your server</strong> at
+    <a href="https://nexlink.free.nf/api-sample" style="color:#f87171">
+      https://nexlink.free.nf/api-sample
+    </a>
+    — or host this file on any web server.
+  </div>
+
+  <div class="key-box">
+    <label>🔑 API Key</label>
+    <div class="key-val">nxl_live_4d2b2623e55c45be2d5••••</div>
+    <button class="copy-key" onclick="copyKey()">Copy Full Key</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on"  onclick="tab('shorten',this)">🔗 Shorten</button>
+    <button class="tab"     onclick="tab('stats',this)">📊 Stats</button>
+    <button class="tab"     onclick="tab('delete',this)">🗑️ Delete</button>
+    <button class="tab"     onclick="tab('profile',this)">👤 Profile</button>
+    <button class="tab"     onclick="tab('leaderboard',this)">🏆 Leaderboard</button>
+  </div>
+
+  <div id="p-shorten" class="panel on">
+    <div class="card">
+      <div class="card-title">🔗 Shorten a URL</div>
+      <label>Destination URL *</label>
+      <input type="url" id="s-url" placeholder="https://example.com/very-long-url">
+      <div class="row">
+        <div><label>Custom Alias (VIP)</label><input type="text" id="s-alias" placeholder="my-brand"></div>
+        <div><label>Expiry (days)</label><input type="number" id="s-days" placeholder="30" min="1"></div>
+      </div>
+      <button class="btn btn-blue" id="s-btn" onclick="doShorten()">🔗 Create Short Link</button>
+      <div id="s-res" class="res"></div>
+      <div id="s-box" class="short-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
+          <span class="short-url" id="s-url-out"></span>
+          <button class="cbtn" onclick="copyOut()">Copy</button>
+        </div>
+        <img id="s-qr" class="qr" alt="QR Code" onload="this.classList.add('show')" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+
+  <div id="p-stats" class="panel">
+    <div class="card">
+      <div class="card-title">📊 Get Link Statistics</div>
+      <label>Short Code (e.g. abc123)</label>
+      <input type="text" id="st-code" placeholder="abc123">
+      <button class="btn btn-blue" onclick="doStats()">📊 Get Stats</button>
+      <div id="st-res" class="res"></div>
+    </div>
+  </div>
+
+  <div id="p-delete" class="panel">
+    <div class="card">
+      <div class="card-title">🗑️ Delete a Link</div>
+      <label>Short Code to Delete</label>
+      <input type="text" id="d-code" placeholder="abc123">
+      <button class="btn btn-red" onclick="doDelete()">🗑️ Delete Permanently</button>
+      <div id="d-res" class="res"></div>
+    </div>
+  </div>
+
+  <div id="p-profile" class="panel">
+    <div class="card">
+      <div class="card-title">👤 My Profile</div>
+      <button class="btn btn-blue" onclick="doMe()">👤 Load Profile</button>
+      <div id="me-res" class="res"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔗 My Links (last 5)</div>
+      <button class="btn btn-blue" onclick="doMyLinks()">🔗 Load Links</button>
+      <div id="ml-res" class="res"></div>
+    </div>
+  </div>
+
+  <div id="p-leaderboard" class="panel">
+    <div class="card">
+      <div class="card-title">🏆 Top Coin Earners (public)</div>
+      <button class="btn btn-blue" onclick="doLeaderboard()">🏆 Load Leaderboard</button>
+      <div id="lb-res" class="res"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="https://nexlink.free.nf">← NexLink</a> ·
+    <a href="https://nexlink.free.nf/api-docs">Full API Docs</a> ·
+    <a href="https://nexlink.free.nf/profile">Manage API Keys</a>
+  </div>
+</div>
+
+<script>
+var KEY  = "nxl_live_4d2b2623e55c45be2d5007574eb4a858723ea5f0";
+var BASE = "https:\/\/nexlink.free.nf\/api\/v1";
+var HDR  = { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+
+// Show CORS warning when opened from file://
+if (location.protocol === 'file:') {
+  document.getElementById('cors-warn').classList.add('show');
+}
+
+function show(id, text, cls) {
+  var el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'res show' + (cls ? ' ' + cls : '');
+}
+
+async function apiFetch(method, path, body) {
+  var opts = { method: method, headers: HDR };
+  if (body) opts.body = JSON.stringify(body);
+  var r = await fetch(BASE + path, opts);
+  return r.json();
+}
+
+async function doShorten() {
+  var url = (document.getElementById('s-url').value || '').trim();
+  if (!url) { alert('Please enter a URL'); return; }
+  var btn = document.getElementById('s-btn');
+  btn.disabled = true; btn.textContent = '⏳ Creating…';
+  document.getElementById('s-box').className = 'short-box';
+  show('s-res', 'Creating short link…', '');
+  try {
+    var body = { url: url };
+    var al = (document.getElementById('s-alias').value || '').trim();
+    var dy = document.getElementById('s-days').value;
+    if (al) body.alias = al;
+    if (dy) body.expiry_days = parseInt(dy);
+    var j = await apiFetch('POST', '/shorten', body);
+    if (j.success) {
+      document.getElementById('s-res').className = 'res';
+      document.getElementById('s-box').className = 'short-box show';
+      document.getElementById('s-url-out').textContent = j.data.short_url;
+      var qr = document.getElementById('s-qr');
+      qr.src = j.data.qr_url + '?size=280';
+    } else {
+      show('s-res', '❌ ' + ((j.error && j.error.message) || 'Failed'), 'err');
+    }
+  } catch(e) { show('s-res', '❌ Network error: ' + e.message + '\n\nIf opening from file://, host this file on a web server.', 'err'); }
+  btn.disabled = false; btn.innerHTML = '🔗 Create Short Link';
+}
+
+async function doStats() {
+  var code = (document.getElementById('st-code').value || '').trim();
+  if (!code) { alert('Enter a short code'); return; }
+  show('st-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/stats/' + code);
+    show('st-res', JSON.stringify(j.data || j.error, null, 2), j.success ? 'ok' : 'err');
+  } catch(e) { show('st-res', 'Error: ' + e.message, 'err'); }
+}
+
+async function doDelete() {
+  var code = (document.getElementById('d-code').value || '').trim();
+  if (!code) { alert('Enter a short code'); return; }
+  if (!confirm('Delete /' + code + ' permanently?')) return;
+  show('d-res', 'Deleting…', '');
+  try {
+    var j = await apiFetch('DELETE', '/delete/' + code);
+    show('d-res', j.success ? '✅ Deleted successfully' : '❌ ' + ((j.error && j.error.message) || 'Failed'), j.success ? 'ok' : 'err');
+  } catch(e) { show('d-res', 'Error: ' + e.message, 'err'); }
+}
+
+async function doMe() {
+  show('me-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/me');
+    show('me-res', JSON.stringify(j.data, null, 2), j.success ? 'ok' : 'err');
+  } catch(e) { show('me-res', 'Error: ' + e.message, 'err'); }
+}
+
+async function doMyLinks() {
+  show('ml-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/me/links');
+    if (j.success) {
+      var links = (j.data.links || []).slice(0, 5).map(function(l) {
+        return '/' + l.short_code + '  →  ' + l.original_url.slice(0, 55) + (l.original_url.length > 55 ? '…' : '') + '\n   Clicks: ' + (l.stats && l.stats.total_clicks || 0);
+      }).join('\n\n');
+      show('ml-res', links || 'No links yet.', 'ok');
+    } else { show('ml-res', '❌ ' + ((j.error && j.error.message) || 'Error'), 'err'); }
+  } catch(e) { show('ml-res', 'Error: ' + e.message, 'err'); }
+}
+
+async function doLeaderboard() {
+  show('lb-res', 'Loading…', '');
+  try {
+    var j = await apiFetch('GET', '/leaderboard');
+    if (j.success) {
+      var rows = (j.data.leaderboard || []).map(function(u, i) {
+        return (i+1) + '. ' + u.username + ' — 🪙 ' + u.coins + ' coins  (' + u.role + ')';
+      }).join('\n');
+      show('lb-res', rows, 'ok');
+    } else { show('lb-res', '❌ Error', 'err'); }
+  } catch(e) { show('lb-res', 'Error: ' + e.message, 'err'); }
+}
+
+function copyKey() {
+  var ta = document.createElement('textarea');
+  ta.value = KEY;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+  alert('API key copied!');
+}
+
+function copyOut() {
+  var url = document.getElementById('s-url-out').textContent;
+  var ta = document.createElement('textarea');
+  ta.value = url; ta.style.cssText = 'position:fixed;opacity:0;top:0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+  event.target.textContent = '✓'; setTimeout(function(){ event.target.textContent = 'Copy'; }, 2000);
+}
+
+function tab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+  document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('on'); });
+  document.getElementById('p-' + id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
